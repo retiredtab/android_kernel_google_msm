@@ -280,7 +280,7 @@ int jffs2_init_acl_pre(struct inode *dir_i, struct inode *inode, umode_t *i_mode
 		if (S_ISDIR(*i_mode))
 			set_cached_acl(inode, ACL_TYPE_DEFAULT, acl);
 
-		rc = posix_acl_create(&acl, GFP_KERNEL, i_mode);
+		rc = __posix_acl_create(&acl, GFP_KERNEL, i_mode);
 		if (rc < 0)
 			return rc;
 		if (rc > 0)
@@ -320,7 +320,7 @@ int jffs2_acl_chmod(struct inode *inode)
 	acl = jffs2_get_acl(inode, ACL_TYPE_ACCESS);
 	if (IS_ERR(acl) || !acl)
 		return PTR_ERR(acl);
-	rc = posix_acl_chmod(&acl, GFP_KERNEL, inode->i_mode);
+	rc = __posix_acl_chmod(&acl, GFP_KERNEL, inode->i_mode);
 	if (rc)
 		return rc;
 	rc = jffs2_set_acl(inode, ACL_TYPE_ACCESS, acl);
@@ -362,7 +362,7 @@ static int jffs2_acl_getxattr(struct dentry *dentry, const char *name,
 		return PTR_ERR(acl);
 	if (!acl)
 		return -ENODATA;
-	rc = posix_acl_to_xattr(acl, buffer, size);
+	rc = posix_acl_to_xattr(&init_user_ns, acl, buffer, size);
 	posix_acl_release(acl);
 
 	return rc;
@@ -380,7 +380,7 @@ static int jffs2_acl_setxattr(struct dentry *dentry, const char *name,
 		return -EPERM;
 
 	if (value) {
-		acl = posix_acl_from_xattr(value, size);
+		acl = posix_acl_from_xattr(&init_user_ns, value, size);
 		if (IS_ERR(acl))
 			return PTR_ERR(acl);
 		if (acl) {

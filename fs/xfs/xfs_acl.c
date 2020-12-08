@@ -278,12 +278,12 @@ xfs_inherit_acl(struct inode *inode, struct posix_acl *acl)
 			goto out;
 	}
 
-	error = posix_acl_create(&acl, GFP_KERNEL, &mode);
+	error = __posix_acl_create(&acl, GFP_KERNEL, &mode);
 	if (error < 0)
 		return error;
 
 	/*
-	 * If posix_acl_create returns a positive value we need to
+	 * If __posix_acl_create returns a positive value we need to
 	 * inherit a permission that can't be represented using the Unix
 	 * mode bits and we actually need to set an ACL.
 	 */
@@ -315,7 +315,7 @@ xfs_acl_chmod(struct inode *inode)
 	if (IS_ERR(acl) || !acl)
 		return PTR_ERR(acl);
 
-	error = posix_acl_chmod(&acl, GFP_KERNEL, inode->i_mode);
+	error = __posix_acl_chmod(&acl, GFP_KERNEL, inode->i_mode);
 	if (error)
 		return error;
 
@@ -337,7 +337,7 @@ xfs_xattr_acl_get(struct dentry *dentry, const char *name,
 	if (acl == NULL)
 		return -ENODATA;
 
-	error = posix_acl_to_xattr(acl, value, size);
+	error = posix_acl_to_xattr(&init_user_ns, acl, value, size);
 	posix_acl_release(acl);
 
 	return error;
@@ -361,7 +361,7 @@ xfs_xattr_acl_set(struct dentry *dentry, const char *name,
 	if (!value)
 		goto set_acl;
 
-	acl = posix_acl_from_xattr(value, size);
+	acl = posix_acl_from_xattr(&init_user_ns, value, size);
 	if (!acl) {
 		/*
 		 * acl_set_file(3) may request that we set default ACLs with

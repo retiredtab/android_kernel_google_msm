@@ -30,7 +30,7 @@ posix_acl_set(struct dentry *dentry, const char *name, const void *value,
 		return -EPERM;
 
 	if (value) {
-		acl = posix_acl_from_xattr(value, size);
+		acl = posix_acl_from_xattr(&init_user_ns, value, size);
 		if (IS_ERR(acl)) {
 			return PTR_ERR(acl);
 		} else if (acl) {
@@ -77,7 +77,7 @@ posix_acl_get(struct dentry *dentry, const char *name, void *buffer,
 		return PTR_ERR(acl);
 	if (acl == NULL)
 		return -ENODATA;
-	error = posix_acl_to_xattr(acl, buffer, size);
+	error = posix_acl_to_xattr(&init_user_ns, acl, buffer, size);
 	posix_acl_release(acl);
 
 	return error;
@@ -358,7 +358,7 @@ reiserfs_inherit_default_acl(struct reiserfs_transaction_handle *th,
 
 		/* Now we reconcile the new ACL and the mode,
 		   potentially modifying both */
-		err = posix_acl_create(&acl, GFP_NOFS, &inode->i_mode);
+		err = __posix_acl_create(&acl, GFP_NOFS, &inode->i_mode);
 		if (err < 0)
 			return err;
 
@@ -440,7 +440,7 @@ int reiserfs_acl_chmod(struct inode *inode)
 		return 0;
 	if (IS_ERR(acl))
 		return PTR_ERR(acl);
-	error = posix_acl_chmod(&acl, GFP_NOFS, inode->i_mode);
+	error = __posix_acl_chmod(&acl, GFP_NOFS, inode->i_mode);
 	if (error)
 		return error;
 

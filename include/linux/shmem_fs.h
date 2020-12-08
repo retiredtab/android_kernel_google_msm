@@ -1,15 +1,18 @@
 #ifndef __SHMEM_FS_H
 #define __SHMEM_FS_H
 
+#include <linux/file.h>
 #include <linux/swap.h>
 #include <linux/mempolicy.h>
 #include <linux/pagemap.h>
 #include <linux/percpu_counter.h>
+#include <linux/xattr.h>
 
 /* inode in-kernel data */
 
 struct shmem_inode_info {
 	spinlock_t		lock;
+	unsigned int		seals;		/* shmem seals */
 	unsigned long		flags;
 	unsigned long		alloced;	/* data pages alloced to file */
 	union {
@@ -18,7 +21,7 @@ struct shmem_inode_info {
 	};
 	struct shared_policy	policy;		/* NUMA memory alloc policy */
 	struct list_head	swaplist;	/* chain of maybes on swap */
-	struct list_head	xattr_list;	/* list of shmem_xattr */
+	struct simple_xattrs	xattrs;		/* list of xattrs */
 	struct inode		vfs_inode;
 };
 
@@ -46,6 +49,8 @@ extern int shmem_init(void);
 extern int shmem_fill_super(struct super_block *sb, void *data, int silent);
 extern struct file *shmem_file_setup(const char *name,
 					loff_t size, unsigned long flags);
+extern struct file *shmem_kernel_file_setup(const char *name, loff_t size,
+					    unsigned long flags);
 extern int shmem_zero_setup(struct vm_area_struct *);
 extern int shmem_lock(struct file *file, int lock, struct user_struct *user);
 extern void shmem_unlock_mapping(struct address_space *mapping);
@@ -60,5 +65,20 @@ static inline struct page *shmem_read_mapping_page(
 	return shmem_read_mapping_page_gfp(mapping, index,
 					mapping_gfp_mask(mapping));
 }
+
+#ifdef CONFIG_TMPFS
+
+extern int shmem_add_seals(struct file *file, unsigned int seals);
+extern int shmem_get_seals(struct file *file);
+extern long shmem_fcntl(struct file *file, unsigned int cmd, unsigned long arg);
+
+#else
+
+static inline long shmem_fcntl(struct file *f, unsigned int c, unsigned long a)
+{
+	return -EINVAL;
+}
+
+#endif
 
 #endif

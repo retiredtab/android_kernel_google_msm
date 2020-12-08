@@ -64,7 +64,7 @@ struct posix_acl *jfs_get_acl(struct inode *inode, int type)
 		else
 			acl = ERR_PTR(size);
 	} else {
-		acl = posix_acl_from_xattr(value, size);
+		acl = posix_acl_from_xattr(&init_user_ns, value, size);
 	}
 	kfree(value);
 	if (!IS_ERR(acl))
@@ -100,7 +100,7 @@ static int jfs_set_acl(tid_t tid, struct inode *inode, int type,
 		value = kmalloc(size, GFP_KERNEL);
 		if (!value)
 			return -ENOMEM;
-		rc = posix_acl_to_xattr(acl, value, size);
+		rc = posix_acl_to_xattr(&init_user_ns, acl, value, size);
 		if (rc < 0)
 			goto out;
 	}
@@ -132,7 +132,7 @@ int jfs_init_acl(tid_t tid, struct inode *inode, struct inode *dir)
 			if (rc)
 				goto cleanup;
 		}
-		rc = posix_acl_create(&acl, GFP_KERNEL, &inode->i_mode);
+		rc = __posix_acl_create(&acl, GFP_KERNEL, &inode->i_mode);
 		if (rc < 0)
 			goto cleanup; /* posix_acl_release(NULL) is no-op */
 		if (rc > 0)
@@ -161,7 +161,7 @@ int jfs_acl_chmod(struct inode *inode)
 	if (IS_ERR(acl) || !acl)
 		return PTR_ERR(acl);
 
-	rc = posix_acl_chmod(&acl, GFP_KERNEL, inode->i_mode);
+	rc = __posix_acl_chmod(&acl, GFP_KERNEL, inode->i_mode);
 	if (rc)
 		return rc;
 
