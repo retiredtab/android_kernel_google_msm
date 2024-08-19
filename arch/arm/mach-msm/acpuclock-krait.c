@@ -50,10 +50,10 @@
 /** elementalx defs  **/
 
 int uv_bin = 0;
-uint32_t arg_max_oc0 = 1512000;
-uint32_t arg_max_oc1 = 1512000;
-uint32_t arg_max_oc2 = 1512000;
-uint32_t arg_max_oc3 = 1512000;
+uint32_t arg_max_oc0 = 1728000;
+uint32_t arg_max_oc1 = 1728000;
+uint32_t arg_max_oc2 = 1728000;
+uint32_t arg_max_oc3 = 1728000;
 
 int pvs_number = 0;
 module_param(pvs_number, int, 0755); 
@@ -65,7 +65,7 @@ static int __init cpufreq_read_arg_max_oc0(char *max_oc0)
 	int err;
 	err = strict_strtoul(max_oc0, 0, &ui_khz);
 	if (err) {
-		arg_max_oc0 = 1512000;
+		arg_max_oc0 = 1728000;
 		printk(KERN_INFO "[elementalx]: max_oc0='%i'\n", arg_max_oc0);
 		return 1;
 	}
@@ -82,7 +82,7 @@ static int __init cpufreq_read_arg_max_oc1(char *max_oc1)
 	int err;
 	err = strict_strtoul(max_oc1, 0, &ui_khz);
 	if (err) {
-		arg_max_oc1 = 1512000;
+		arg_max_oc1 = 1728000;
 		printk(KERN_INFO "[elementalx]: max_oc1='%i'\n", arg_max_oc1);
 		return 1;
 	}
@@ -99,7 +99,7 @@ static int __init cpufreq_read_arg_max_oc2(char *max_oc2)
 	int err;
 	err = strict_strtoul(max_oc2, 0, &ui_khz);
 	if (err) {
-		arg_max_oc2 = 1512000;
+		arg_max_oc2 = 1728000;
 		printk(KERN_INFO "[elementalx]: max_oc2='%i'\n", arg_max_oc2);
 		return 1;
 	}
@@ -116,7 +116,7 @@ static int __init cpufreq_read_arg_max_oc3(char *max_oc3)
 	int err;
 	err = strict_strtoul(max_oc3, 0, &ui_khz);
 	if (err) {
-		arg_max_oc3 = 1512000;
+		arg_max_oc3 = 1728000;
 		printk(KERN_INFO "[elementalx]: max_oc3='%i'\n", arg_max_oc3);
 		return 1;
 	}
